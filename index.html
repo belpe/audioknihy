@@ -5,90 +5,768 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Audioknihy</title>
 <style>
-  :root { --bg: #fafaf9; --card: #fff; --border: #e7e5e4; --text: #1c1917; --muted: #78716c; --accent: #b45309; --accent-light: #fef3c7; --hover: #f5f5f4; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
-  .header { padding: 2.5rem 2rem 1.5rem; max-width: 960px; margin: 0 auto; }
-  .header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; }
-  .header p { color: var(--muted); margin-top: .25rem; font-size: .9rem; }
-  .stats { display: flex; gap: 2rem; margin-top: 1rem; font-size: .85rem; color: var(--muted); }
-  .stats span { background: var(--card); border: 1px solid var(--border); padding: .3rem .75rem; border-radius: 6px; }
-  .stats b { color: var(--text); }
-  .search-box { max-width: 960px; margin: 0 auto; padding: 0 2rem .75rem; }
-  .search-box input { width: 100%; padding: .6rem 1rem; border: 1px solid var(--border); border-radius: 8px; font-size: .95rem; background: var(--card); outline: none; transition: border-color .2s; }
-  .search-box input:focus { border-color: var(--accent); }
-  .list { max-width: 960px; margin: 0 auto; padding: 0 2rem 3rem; }
-  .author-group { margin-bottom: .25rem; }
-  .author-name { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: .75rem 0 .25rem; border-bottom: 1px solid var(--border); margin-bottom: 2px; }
-  .book { display: flex; align-items: baseline; gap: .5rem; padding: .45rem .75rem; border-radius: 6px; text-decoration: none; color: var(--text); transition: background .15s; }
-  .book:hover { background: var(--hover); }
-  .book-title { flex: 1; font-size: .95rem; }
-  .book-meta { font-size: .8rem; color: var(--muted); white-space: nowrap; }
-  .book-size { display: inline-block; min-width: 3.5rem; text-align: right; }
-  .book-tracks { display: inline-block; min-width: 2.5rem; text-align: right; margin-right: .25rem; color: #a8a29e; }
-  .hidden { display: none; }
-  .updated { text-align: center; color: var(--muted); font-size: .75rem; padding: 1rem; }
-  @media (max-width: 640px) {
-    .header, .search-box, .list { padding-left: 1rem; padding-right: 1rem; }
-    .book-tracks { display: none; }
-    .stats { gap: .75rem; flex-wrap: wrap; }
-  }
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+*,:before,:after{margin:0;padding:0;box-sizing:border-box}
+
+:root {
+  --bg: #faf8f5;
+  --bg2: #f3efe9;
+  --card: #ffffff;
+  --border: #e6e0d8;
+  --text: #2c2418;
+  --text2: #6b5e50;
+  --muted: #a69882;
+  --accent: #c2710c;
+  --accent2: #a35d08;
+  --accent-soft: rgba(194,113,12,0.08);
+  --accent-glow: rgba(194,113,12,0.15);
+  --hover: rgba(194,113,12,0.04);
+  --shadow-sm: 0 1px 2px rgba(44,36,24,0.04);
+  --shadow: 0 2px 8px rgba(44,36,24,0.06);
+  --shadow-lg: 0 8px 24px rgba(44,36,24,0.1);
+  --radius: 10px;
+  --cover-placeholder: #e6e0d8;
+  --highlight: #fef7e6;
+  --toolbar-bg: rgba(250,248,245,0.82);
+}
+
+[data-theme="dark"] {
+  --bg: #18150f;
+  --bg2: #211d16;
+  --card: #2a251d;
+  --border: #3d362b;
+  --text: #ede8e0;
+  --text2: #a69882;
+  --muted: #7a6e5f;
+  --accent: #e8a230;
+  --accent2: #f0b652;
+  --accent-soft: rgba(232,162,48,0.1);
+  --accent-glow: rgba(232,162,48,0.18);
+  --hover: rgba(232,162,48,0.05);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.15);
+  --shadow: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.35);
+  --cover-placeholder: #3d362b;
+  --highlight: #3a2f1a;
+  --toolbar-bg: rgba(24,21,15,0.82);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ─── HEADER ─── */
+.header {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 1.2rem;
+}
+.header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.header h1 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.2;
+}
+.subtitle {
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin-top: 0.2rem;
+  font-style: italic;
+}
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--text2);
+  box-shadow: var(--shadow-sm);
+}
+.stat b { color: var(--text); font-weight: 600; }
+
+/* ─── THEME TOGGLE ─── */
+.theme-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, background 0.2s, border-color 0.2s;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+.theme-btn:hover { transform: rotate(25deg); border-color: var(--accent); }
+.theme-btn svg { width: 18px; height: 18px; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ─── STICKY TOOLBAR ─── */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--toolbar-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.toolbar.scrolled {
+  border-bottom-color: var(--border);
+  box-shadow: var(--shadow);
+}
+.toolbar-inner {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0.65rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.search-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.search-wrap {
+  flex: 1;
+  position: relative;
+}
+.search-wrap input {
+  width: 100%;
+  padding: 0.55rem 0.9rem;
+  padding-right: 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: var(--card);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.search-wrap input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.search-wrap input::placeholder { color: var(--muted); }
+.search-kbd {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  pointer-events: none;
+  line-height: 1.4;
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--text2);
+  font-size: 0.82rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+/* ─── SORT & ALPHA ─── */
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.sort-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.sort-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 0.15rem;
+}
+.sort-btn {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text2);
+  font-size: 0.76rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sort-btn:hover { border-color: var(--accent); color: var(--accent); }
+.sort-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.sep { width: 1px; height: 18px; background: var(--border); margin: 0 0.25rem; flex-shrink: 0; }
+
+.alpha-nav {
+  display: flex;
+  gap: 1px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+  min-width: 0;
+}
+.alpha-nav::-webkit-scrollbar { display: none; }
+.alpha-btn {
+  min-width: 26px; height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  transition: all 0.12s;
+  flex-shrink: 0;
+}
+.alpha-btn:hover:not(:disabled) { background: var(--accent-soft); color: var(--accent); }
+.alpha-btn.active { background: var(--accent); color: #fff; }
+.alpha-btn:disabled { opacity: 0.25; cursor: default; }
+
+/* ─── BOOK LIST ─── */
+.list {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0.5rem 2rem 3rem;
+}
+
+.letter-section { scroll-margin-top: 140px; }
+
+.author-head {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  padding: 1rem 0 0.3rem 0;
+  margin-top: 0.25rem;
+  border-left: 3px solid var(--accent);
+  padding-left: 0.75rem;
+}
+
+.book {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.65rem;
+  min-height: 2.75rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.15s, transform 0.12s;
+  position: relative;
+}
+.book:hover { background: var(--hover); transform: translateX(2px); }
+.book.highlighted {
+  background: var(--highlight);
+  animation: glow 2.5s ease-out forwards;
+}
+@keyframes glow {
+  0%   { box-shadow: 0 0 0 0 var(--accent-glow); }
+  30%  { box-shadow: 0 0 0 6px var(--accent-glow); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.book-cover {
+  width: 36px; height: 50px;
+  border-radius: 4px;
+  object-fit: cover;
+  background: var(--cover-placeholder);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+.book-no-cover {
+  width: 36px; height: 50px;
+  border-radius: 4px;
+  background: var(--cover-placeholder);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.book-no-cover svg { width: 16px; height: 16px; stroke: var(--muted); opacity: 0.5; fill: none; stroke-width: 1.5; }
+
+.book-info { flex: 1; min-width: 0; }
+.book-title {
+  font-size: 0.92rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.book-author-inline {
+  font-size: 0.78rem;
+  color: var(--muted);
+  display: none;
+}
+.flat-mode .book-author-inline { display: block; }
+
+.book-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.book-date {
+  display: none;
+  min-width: 5rem;
+  text-align: right;
+}
+.date-mode .book-date { display: block; }
+.book-tracks { min-width: 3.5rem; text-align: right; }
+.book-size { min-width: 3.5rem; text-align: right; font-weight: 500; color: var(--text2); }
+
+/* ─── COVER TOOLTIP ─── */
+.cover-tip {
+  display: none;
+  position: fixed;
+  z-index: 200;
+  width: 160px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  pointer-events: none;
+  background: var(--card);
+  overflow: hidden;
+}
+.cover-tip img { width: 100%; display: block; }
+.cover-tip.visible { display: block; }
+
+/* ─── FOOTER ─── */
+.footer {
+  max-width: 980px;
+  margin: 0 auto;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 1rem 2rem 2rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ─── BACK TO TOP ─── */
+.top-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.top-btn.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.top-btn:hover { border-color: var(--accent); color: var(--accent); }
+.top-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+
+/* ─── EMPTY STATE ─── */
+.empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 700px) {
+  .header { padding: 1.5rem 1rem 1rem; }
+  .header h1 { font-size: 1.5rem; }
+  .toolbar-inner { padding: 0.5rem 1rem; }
+  .list { padding: 0.5rem 1rem 2rem; }
+  .footer { padding: 1rem; }
+  .book-tracks { display: none; }
+  .book-cover, .book-no-cover { width: 28px; height: 38px; }
+  .stats { gap: 0.35rem; }
+  .stat { font-size: 0.74rem; padding: 0.25rem 0.55rem; }
+  .controls-row { gap: 0.4rem; }
+  .search-kbd { display: none; }
+  .alpha-btn { min-width: 24px; height: 24px; font-size: 0.65rem; }
+  .letter-section { scroll-margin-top: 120px; }
+}
+@media (max-width: 440px) {
+  .book-cover, .book-no-cover { display: none; }
+  .book-date { min-width: auto; }
+}
 </style>
 </head>
 <body>
-<div class="header">
-  <h1>Audioknihy</h1>
-  <p>Katalóg audiokníh</p>
+
+<header class="header">
+  <div class="header-row">
+    <div>
+      <h1>Audioknihy</h1>
+      <p class="subtitle">Osobná knižnica audiokníh</p>
+    </div>
+    <button id="theme-toggle" class="theme-btn" aria-label="Prepnúť tému"></button>
+  </div>
   <div class="stats">
-    <span><b id="count-total">0</b> kníh</span>
-    <span><b id="count-authors">0</b> autorov</span>
-    <span><b id="count-shown">0</b> zobrazených</span>
+    <span class="stat"><b id="st-books">0</b> kníh</span>
+    <span class="stat"><b id="st-authors">0</b> autorov</span>
+    <span class="stat"><b id="st-audio">0</b> stôp</span>
+    <span class="stat"><b id="st-size">—</b></span>
+  </div>
+</header>
+
+<div class="toolbar" id="toolbar">
+  <div class="toolbar-inner">
+    <div class="search-row">
+      <div class="search-wrap">
+        <input type="text" id="search" placeholder="Hľadať autora alebo názov…" autocomplete="off">
+        <kbd class="search-kbd">/</kbd>
+      </div>
+      <button class="btn" id="random-btn">
+        <svg viewBox="0 0 24 24"><path d="M18 4l3 3-3 3"/><path d="M18 20l3-3-3-3"/><path d="M3 7h3a5 5 0 0 1 5 5 5 5 0 0 0 5 5h5"/><path d="M21 7h-5a5 5 0 0 0-2.8.9"/><path d="M3 17h3a5 5 0 0 0 2.8-.9"/></svg>
+        Náhodná
+      </button>
+    </div>
+    <div class="controls-row">
+      <div class="sort-group">
+        <span class="sort-label">Zoradiť</span>
+        <button class="sort-btn active" data-sort="author">Autor</button>
+        <button class="sort-btn" data-sort="title">Názov</button>
+        <button class="sort-btn" data-sort="tracks">Stopy</button>
+        <button class="sort-btn" data-sort="size">Veľkosť</button>
+        <button class="sort-btn" data-sort="date">Dátum</button>
+      </div>
+      <div class="sep"></div>
+      <nav class="alpha-nav" id="alpha-nav"></nav>
+    </div>
   </div>
 </div>
-<div class="search-box">
-  <input type="text" id="search" placeholder="Hľadať autora alebo názov..." autofocus>
-</div>
+
 <div class="list" id="list"></div>
-<div class="updated" id="updated"></div>
+<div class="footer" id="footer"></div>
+
+<div class="cover-tip" id="cover-tip"><img id="cover-tip-img" src="" alt=""></div>
+
+<button class="top-btn" id="top-btn" aria-label="Nahor">
+  <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+</button>
+
 <script>
-const books = [{"a":"—","t":"また、同じ夢を見ていた","n":21,"s":"488M"},{"a":"Adams, Douglas","t":"Stopařův průvodce po Galaxii","n":36,"s":"532M"},{"a":"Adler-Olsen, Jussi","t":"Chlorid sodný","n":52,"s":"883M"},{"a":"Adler-Olsen, Jussi","t":"Marco","n":45,"s":"671M"},{"a":"Adler-Olsen, Jussi","t":"Nesmírný","n":55,"s":"798M"},{"a":"Adler-Olsen, Jussi","t":"Oběť 2117","n":73,"s":"1.0G"},{"a":"Adler-Olsen, Jussi","t":"Selfies","n":64,"s":"925M"},{"a":"Adler-Olsen, Jussi","t":"Složka 64","n":59,"s":"1.1G"},{"a":"Adler-Olsen, Jussi","t":"Vzkaz v láhvi","n":53,"s":"1.0G"},{"a":"Adler-Olsen, Jussi","t":"Zabijáci","n":44,"s":"562M"},{"a":"Adler-Olsen, Jussi","t":"Žena v kleci","n":40,"s":"513M"},{"a":"Aldiss, Brian Wilson","t":"Nonstop","n":17,"s":"505M"},{"a":"Asimov, Isaac","t":"Nadace","n":26,"s":"484M"},{"a":"Bárdy, Peter","t":"Zuzana Čaputová: Odvaha k ľudskosti","n":46,"s":"573M"},{"a":"Belmondo, Jean-Paul","t":"Mých 1000 životů","n":24,"s":"509M"},{"a":"Bjork, Samuel","t":"Sova","n":43,"s":"680M"},{"a":"Boček, Evžen","t":"Poslední aristokratka","n":8,"s":"222M"},{"a":"Bosco, Henri","t":"Měsíční pahorek v dlani","n":8,"s":"107M"},{"a":"Brown, Dan","t":"Andělé a démoni","n":8,"s":"405M"},{"a":"Brown, Dan","t":"Da Vinciho kód","n":16,"s":"433M"},{"a":"Brown, Dan","t":"Inferno","n":107,"s":"969M"},{"a":"Brown, Dan","t":"Pavučina lží","n":150,"s":"1.0G"},{"a":"Brown, Dan","t":"Počátek","n":107,"s":"1.1G"},{"a":"Brown, Dan","t":"Tajemství všech tajemství","n":0,"s":"821M"},{"a":"Brown, Dan","t":"Ztracený symbol","n":154,"s":"1.1G"},{"a":"Bryson, Bill","t":"Ľudské telo","n":50,"s":"1.0G"},{"a":"Bryson, Bill","t":"Stručná história takmer všetkého","n":50,"s":"1.2G"},{"a":"Bukowski, Charles","t":"Těžké časy","n":10,"s":"93M"},{"a":"Bulgakov, Michail","t":"Mistr a Markétka","n":3,"s":"204M"},{"a":"Camus, Albert","t":"Nedorozumění","n":1,"s":"89M"},{"a":"Carter, Forrest","t":"Odvedu vás do Sierry Madre","n":22,"s":"782M"},{"a":"Carter, Forrest","t":"Škola Malého stromu","n":21,"s":"400M"},{"a":"Castaneda, Carlos","t":"Cesta do Ixtlanu","n":30,"s":"535M"},{"a":"Castaneda, Carlos","t":"Oddělená skutečnost","n":31,"s":"546M"},{"a":"Castaneda, Carlos","t":"Učení dona Juana","n":31,"s":"539M"},{"a":"Cch'-sin, Liou","t":"Problém tří těles","n":35,"s":"780M"},{"a":"Cch'-sin, Liou","t":"Temný les","n":35,"s":"1.2G"},{"a":"Cch'-sin, Liou","t":"Vzpomínka na Zemi","n":83,"s":"867M"},{"a":"Chandler, Raymond","t":"Hluboký spánek","n":32,"s":"499M"},{"a":"Child, Lee","t":"A přece nezemřeš","n":46,"s":"1.5G"},{"a":"Child, Lee","t":"Nevracej se","n":69,"s":"681M"},{"a":"Child, Lee","t":"Volný pád","n":85,"s":"738M"},{"a":"Christie, Agatha","t":"Herkulovské úkoly pro Hercula Poirota","n":13,"s":"542M"},{"a":"Christie, Agatha","t":"Královský rubín","n":3,"s":"103M"},{"a":"Christie, Agatha","t":"Krysy","n":1,"s":"61M"},{"a":"Christie, Agatha","t":"Opona","n":56,"s":"447M"},{"a":"Christie, Agatha","t":"Vražda v postranní ulici","n":16,"s":"141M"},{"a":"Cima, Anna","t":"Probudím se na Šibuji","n":58,"s":"596M"},{"a":"Clancy, Tom","t":"Vysoká hra patriotů","n":26,"s":"1.8G"},{"a":"Clavell, James","t":"Šógun","n":67,"s":"3.3G"},{"a":"Coelho, Paulo","t":"Alchymista","n":29,"s":"227M"},{"a":"Connelly, Michael","t":"Čakanie","n":57,"s":"700M"},{"a":"Connelly, Michael","t":"Černý led","n":48,"s":"764M"},{"a":"Connelly, Michael","t":"Hodina duchov","n":47,"s":"633M"},{"a":"Connelly, Michael","t":"Kufrové tango","n":29,"s":"790M"},{"a":"Connelly, Michael","t":"Kvapka","n":42,"s":"657M"},{"a":"Connelly, Michael","t":"Mesto kostí","n":54,"s":"697M"},{"a":"Connelly, Michael","t":"Posledný kojot","n":52,"s":"797M"},{"a":"Connelly, Michael","t":"Púštna hviezda","n":110,"s":"607M"},{"a":"Connelly, Michael","t":"Temná ozvena","n":59,"s":"863M"},{"a":"Connelly, Michael","t":"Výstraha","n":50,"s":"637M"},{"a":"Cook, Robin","t":"Invaze z galaxie","n":38,"s":"339M"},{"a":"Cornwell, Bernard","t":"Azincourt","n":21,"s":"1.0G"},{"a":"Cousteau, Jacques-Yves","t":"Život na konci sveta","n":13,"s":"482M"},{"a":"Dahl, Roald","t":"Host do domu","n":8,"s":"295M"},{"a":"Dán, Dominik","t":"Básnik","n":69,"s":"649M"},{"a":"Dán, Dominik","t":"Beštia","n":26,"s":"961M"},{"a":"Dán, Dominik","t":"Cela číslo 17","n":39,"s":"622M"},{"a":"Dán, Dominik","t":"Jednou nohou v hrobe","n":73,"s":"652M"},{"a":"Dán, Dominik","t":"Krv nie je voda","n":68,"s":"593M"},{"a":"Dán, Dominik","t":"Mucha","n":49,"s":"614M"},{"a":"Dán, Dominik","t":"Mucholapka","n":52,"s":"602M"},{"a":"Dán, Dominik","t":"Nežná fatamorgána","n":59,"s":"544M"},{"a":"Dán, Dominik","t":"Popol všetkých zarovná","n":37,"s":"1.0G"},{"a":"Dán, Dominik","t":"Rudý kapitán","n":33,"s":"744M"},{"a":"Dán, Dominik","t":"Smrť na druhom brehu","n":68,"s":"602M"},{"a":"Dán, Dominik","t":"Uzol","n":67,"s":"569M"},{"a":"de la Motte, Anders","t":"Game","n":34,"s":"509M"},{"a":"Deaver, Jeffery","t":"Ďáblova slza","n":42,"s":"528M"},{"a":"Deaver, Jeffery","t":"Katedrála hrůzy","n":43,"s":"603M"},{"a":"Deaver, Jeffery","t":"Kříže u cesty","n":57,"s":"752M"},{"a":"Deaver, Jeffery","t":"Ocelový polibek","n":72,"s":"922M"},{"a":"Deaver, Jeffery","t":"Panoptikum","n":40,"s":"634M"},{"a":"Deaver, Jeffery","t":"Příští oběti","n":104,"s":"746M"},{"a":"Deaver, Jeffery","t":"Sběratel kůží","n":84,"s":"738M"},{"a":"Deaver, Jeffery","t":"Tvůj stín","n":87,"s":"745M"},{"a":"Deaver, Jeffery","t":"Zahrada bestií","n":63,"s":"913M"},{"a":"Defoe, Daniel","t":"Robinson Crusoe","n":1,"s":"72M"},{"a":"DeMille, Nelson","t":"Noční pád","n":19,"s":"360M"},{"a":"Dobrovoda, Ľubo","t":"Ja malkáč","n":34,"s":"428M"},{"a":"Dostojevskij, Fjodor Michajlovič","t":"Idiot","n":2,"s":"49M"},{"a":"Doyle, Arthur Conan","t":"15 případů Sherlocka Holmese podruhé","n":15,"s":"277M"},{"a":"Doyle, Arthur Conan","t":"Hrůzostrašné příběhy","n":5,"s":"180M"},{"a":"Dusse, Karsten","t":"Sústreď sa na vraždu","n":37,"s":"505M"},{"a":"Eco, Umberto","t":"Jméno růže","n":9,"s":"323M"},{"a":"Ferrante, Elena","t":"Geniální přítelkyně","n":82,"s":"700M"},{"a":"Ferrante, Elena","t":"Příběh nového jména","n":125,"s":"1.0G"},{"a":"Ferrante, Elena","t":"Příběh těch, co odcházejí, a těch, kteří zůstanou","n":123,"s":"875M"},{"a":"Forsyth, Frederick","t":"Čtvrtý protokol","n":27,"s":"1.0G"},{"a":"Forsyth, Frederick","t":"Žádné stopy","n":43,"s":"643M"},{"a":"Francis, Dick","t":"V nemilosti","n":38,"s":"516M"},{"a":"Gaiman, Neil","t":"American Gods","n":121,"s":"1.2G"},{"a":"Gaiman, Neil","t":"Nikdykde","n":73,"s":"772M"},{"a":"Galeotti, Mark","t":"Musíme si promluvit o Putinovi","n":6,"s":"105M"},{"a":"García Márquez, Gabriel","t":"Sto rokov samoty","n":23,"s":"870M"},{"a":"Gibson, William","t":"Neuromancer","n":38,"s":"698M"},{"a":"Giono, Jean","t":"Muž, ktorý sadil stromy","n":1,"s":"27M"},{"a":"Golden, Arthur","t":"Gejša","n":35,"s":"1.1G"},{"a":"Greaney, Mark","t":"Na mušce","n":53,"s":"806M"},{"a":"Greaney, Mark","t":"Neřízená střela","n":59,"s":"924M"},{"a":"Greaney, Mark","t":"Šedý muž","n":38,"s":"886M"},{"a":"Haig, Matt","t":"Půlnoční knihovna","n":31,"s":"591M"},{"a":"Hailey, Arthur","t":"Detektiv","n":33,"s":"1.1G"},{"a":"Hailey, Arthur","t":"Hotel","n":25,"s":"995M"},{"a":"Hailey, Arthur","t":"Let do nebezpečí","n":2,"s":"133M"},{"a":"Hailey, Arthur","t":"Penězoměnci","n":30,"s":"1.2G"},{"a":"Hall, Ernst","t":"Zvony smrti","n":6,"s":"157M"},{"a":"Harari, Yuval Noah","t":"21 lekcí pro 21. století","n":40,"s":"650M"},{"a":"Harari, Yuval Noah","t":"Sapiens, Stručné dějiny lidstva","n":20,"s":"872M"},{"a":"Hemingway, Ernest","t":"Starec a more","n":3,"s":"302M"},{"a":"Herbert, Frank","t":"Duna","n":76,"s":"1.2G"},{"a":"Horst, Jørn Lier","t":"Zaslepení","n":89,"s":"701M"},{"a":"Isaacson, Walter","t":"Steve Jobs","n":82,"s":"1.4G"},{"a":"Izumi, Kjoka","t":"Mnich z hory Koja","n":1,"s":"163M"},{"a":"Jakovlev, Alexandr","t":"Rusko plné křížů","n":8,"s":"225M"},{"a":"Jánský, Filip","t":"Nebeští jezdci","n":10,"s":"286M"},{"a":"Jirotka, Zdeněk","t":"Muž se psem","n":10,"s":"302M"},{"a":"Jirotka, Zdeněk","t":"Saturnin","n":3,"s":"219M"},{"a":"Jonasson, Jonas","t":"Analfabetka, která uměla počítat","n":25,"s":"704M"},{"a":"Kapitáňová, Daniela","t":"Samko Tále - Kniha o cintoríne","n":11,"s":"296M"},{"a":"Karika, Jozef","t":"Trhlina","n":39,"s":"662M"},{"a":"Kepler, Lars","t":"Hypnotizér","n":71,"s":"908M"},{"a":"Kepler, Lars","t":"Lazar","n":98,"s":"1.1G"},{"a":"Kepler, Lars","t":"Lovec králíků","n":55,"s":"1.1G"},{"a":"Kepler, Lars","t":"Paganiniho smlouva","n":48,"s":"650M"},{"a":"Kepler, Lars","t":"Písečný muž","n":42,"s":"660M"},{"a":"Kepler, Lars","t":"Playground","n":84,"s":"698M"},{"a":"Kepler, Lars","t":"Stalker","n":74,"s":"948M"},{"a":"Kepler, Lars","t":"Svědkyně ohně","n":38,"s":"1.3G"},{"a":"King, Stephen","t":"Osvícení","n":70,"s":"1.0G"},{"a":"King, Stephen","t":"Řbitov zviřátek","n":40,"s":"1.1G"},{"a":"King, Stephen","t":"Vykoupení z věznice Shawshank","n":43,"s":"367M"},{"a":"King, Stephen & Straub, Peter","t":"Černý dům","n":30,"s":"1.5G"},{"a":"King, Stephen & Straub, Peter","t":"Talisman","n":75,"s":"1.5G"},{"a":"Kipling, Rudyard","t":"Bajky i Nebajky","n":5,"s":"93M"},{"a":"Kóbó, Abe","t":"Kouzelná křída","n":1,"s":"27M"},{"a":"Kundera, Milan","t":"Nesmrtelnost","n":114,"s":"736M"},{"a":"Lagercrantz, David","t":"Dívka v pavoučí síti","n":56,"s":"816M"},{"a":"Lagercrantz, David","t":"Muž který hledal svůj stín","n":54,"s":"1.2G"},{"a":"Larsson, Stieg","t":"Dievča, ktoré sa hralo s ohňom","n":58,"s":"1.2G"},{"a":"Larsson, Stieg","t":"Dívka, která kopla do vosího hnízda","n":62,"s":"917M"},{"a":"Larsson, Stieg","t":"Muži, ktorí nenávidia ženy","n":55,"s":"1.2G"},{"a":"Lee, Min Jin","t":"Pačinko","n":58,"s":"1.0G"},{"a":"Lem, Stanislav","t":"Astronauti","n":1,"s":"41M"},{"a":"Lem, Stanislav","t":"Měsíční noc","n":1,"s":"56M"},{"a":"Lem, Stanislav","t":"Solaris","n":13,"s":"479M"},{"a":"Mankell, Henning","t":"Firewall","n":58,"s":"1.0G"},{"a":"Mankell, Henning","t":"Pátá žena","n":55,"s":"771M"},{"a":"Mankell, Henning","t":"Psi z Rigy","n":0,"s":"68K"},{"a":"Mankell, Henning","t":"Ve slepé uličce","n":40,"s":"954M"},{"a":"Mankell, Henning","t":"Vrazi bez tváře","n":0,"s":"96K"},{"a":"Martin, George R.R.","t":"Hra o trůny","n":288,"s":"2.4G"},{"a":"May, Peter","t":"Běžkyně","n":58,"s":"1.0G"},{"a":"May, Peter","t":"Černé světlo","n":29,"s":"556M"},{"a":"May, Peter","t":"Čtvrtá oběť","n":12,"s":"605M"},{"a":"May, Peter","t":"Entomologův odkaz","n":30,"s":"559M"},{"a":"May, Peter","t":"Hadohlavec","n":48,"s":"685M"},{"a":"May, Peter","t":"Kritik","n":24,"s":"552M"},{"a":"May, Peter","t":"Muž z ostrova Lewis","n":57,"s":"633M"},{"a":"May, Peter","t":"Nezvratné alibi","n":55,"s":"610M"},{"a":"May, Peter","t":"Noční brána","n":54,"s":"804M"},{"a":"May, Peter","t":"Ostrov Entry","n":59,"s":"1.3G"},{"a":"May, Peter","t":"Pan ohne","n":27,"s":"632M"},{"a":"May, Peter","t":"Pekingský rozparovač","n":59,"s":"1.0G"},{"a":"May, Peter","t":"Šachové figurky","n":53,"s":"604M"},{"a":"May, Peter","t":"Sál smrti","n":37,"s":"649M"},{"a":"May, Peter","t":"Skála","n":44,"s":"1.1G"},{"a":"May, Peter","t":"Svatba duchů","n":13,"s":"252M"},{"a":"May, Peter","t":"Umrlčí cesta","n":44,"s":"654M"},{"a":"May, Peter","t":"Výjimeční lidé","n":36,"s":"635M"},{"a":"May, Peter","t":"Zpětný ráz","n":31,"s":"518M"},{"a":"McBain, Ed","t":"Překupník","n":16,"s":"393M"},{"a":"McCarthy, Cormac","t":"Cesta","n":43,"s":"566M"},{"a":"McCarthy, Cormac","t":"Tahle země není pro starý","n":13,"s":"473M"},{"a":"McEwan, Ian","t":"Nevinný","n":5,"s":"204M"},{"a":"Molière","t":"Lakomec","n":1,"s":"52M"},{"a":"Monger, Christopher","t":"Angličan, který vylezl na kopec, ale slezl z hory","n":10,"s":"147M"},{"a":"Murakami, Haruki","t":"Bezbarvý Cukuru Tazaki a jeho léta putování","n":30,"s":"555M"},{"a":"Murakami, Haruki","t":"Norské dřevo","n":29,"s":"582M"},{"a":"Murakami, Haruki","t":"Tancuj tancuj tancuj","n":78,"s":"1.2G"},{"a":"Nesbø, Jo","t":"Červenka","n":50,"s":"810M"},{"a":"Nesbø, Jo","t":"Krev na sněhu","n":21,"s":"406M"},{"a":"Nesbø, Jo","t":"Lovci hlav","n":29,"s":"483M"},{"a":"Nesbø, Jo","t":"Macbeth (2018)","n":60,"s":"961M"},{"a":"Nesbø, Jo","t":"Nemesis","n":6,"s":"304M"},{"a":"Nesbø, Jo","t":"Netopýr","n":41,"s":"604M"},{"a":"Nesbø, Jo","t":"Policie","n":52,"s":"778M"},{"a":"Nesbø, Jo","t":"Přízrak","n":67,"s":"820M"},{"a":"Nesbø, Jo","t":"Půlnoční slunce","n":19,"s":"433M"},{"a":"Nesbø, Jo","t":"Snehuliak","n":41,"s":"772M"},{"a":"Nesbø, Jo","t":"Švábi","n":53,"s":"601M"},{"a":"Nesbø, Jo","t":"Syn","n":44,"s":"917M"},{"a":"Nesbø, Jo","t":"Žízeň","n":62,"s":"1.1G"},{"a":"Orwell, George","t":"1984","n":23,"s":"580M"},{"a":"Orwell, George","t":"Farma zvířat","n":9,"s":"448M"},{"a":"Owens, Delia","t":"Kde raky spievajú","n":58,"s":"659M"},{"a":"Pratchett, Terry","t":"Barva kouzel","n":85,"s":"496M"},{"a":"Pratchett, Terry","t":"Čaroprávnost","n":60,"s":"1.1G"},{"a":"Pratchett, Terry","t":"Lehké fantastično","n":81,"s":"705M"},{"a":"Preston, Douglas","t":"Údolí tyranosaura","n":0,"s":"659M"},{"a":"Preston, Douglas & Child, Lincoln","t":"Zátiší s vránami","n":82,"s":"1.5G"},{"a":"Prose, Nita","t":"Pokojská","n":41,"s":"656M"},{"a":"Pullman, Philip","t":"Zlatý kompas","n":98,"s":"817M"},{"a":"Ransome, Arthur","t":"Boj o ostrov","n":5,"s":"84M"},{"a":"Ransome, Arthur","t":"Klub Lysek","n":5,"s":"88M"},{"a":"Ransome, Arthur","t":"Trosečníci z Vlaštovky","n":5,"s":"87M"},{"a":"Ransome, Arthur","t":"Zamrzlá loď kapitána Flinta","n":5,"s":"85M"},{"a":"Redondo, Dolores","t":"Neviditelný strážce","n":43,"s":"842M"},{"a":"Rosten, Leo","t":"Pan Kaplan ma stále třídu rád","n":10,"s":"232M"},{"a":"Rowling, J.K.","t":"Harry Potter a Fénixův řád","n":38,"s":"1.0G"},{"a":"Rowling, J.K.","t":"Harry Potter a Kameň mudrcov","n":17,"s":"450M"},{"a":"Rowling, J.K.","t":"Harry Potter a Ohnivý pohár","n":37,"s":"666M"},{"a":"Rowling, J.K.","t":"Harry Potter a Princ Dvojí Krve","n":30,"s":"1.3G"},{"a":"Rowling, J.K.","t":"Harry Potter a Relikvie smrti","n":72,"s":"1.6G"},{"a":"Rowling, J.K.","t":"Harry Potter a Tajemná komnata","n":18,"s":"358M"},{"a":"Rowling, J.K.","t":"Harry Potter a vězeň z Azkabanu","n":22,"s":"938M"},{"a":"Saint-Exupéry, Antoine de","t":"Malý princ","n":4,"s":"48M"},{"a":"Sapkowski, Andrzej","t":"Bouřková sezóna","n":65,"s":"548M"},{"a":"Sapkowski, Andrzej","t":"Čas opovržení","n":61,"s":"528M"},{"a":"Sapkowski, Andrzej","t":"Křest ohněm","n":66,"s":"524M"},{"a":"Sapkowski, Andrzej","t":"Krev elfů","n":60,"s":"492M"},{"a":"Sapkowski, Andrzej","t":"Meč osudu","n":92,"s":"700M"},{"a":"Sapkowski, Andrzej","t":"Paní jezera","n":112,"s":"880M"},{"a":"Sapkowski, Andrzej","t":"Poslední přání","n":48,"s":"446M"},{"a":"Sapkowski, Andrzej","t":"Věž vlaštovky","n":91,"s":"722M"},{"a":"Shakespeare, William","t":"Othello","n":1,"s":"139M"},{"a":"Shakespeare, William","t":"Rómeo a Júlia","n":1,"s":"149M"},{"a":"Simenon, Georges","t":"4x komisař Maigret počtvrté","n":15,"s":"218M"},{"a":"Simenon, Georges","t":"5x komisař Maigret podruhé","n":18,"s":"321M"},{"a":"Simenon, Georges","t":"5x komisař Maigret","n":15,"s":"287M"},{"a":"Simenon, Georges","t":"Maigret a jeho mrtvý","n":19,"s":"328M"},{"a":"Simenon, Georges","t":"S úctou Picpus","n":14,"s":"119M"},{"a":"Simmons, Dan","t":"Hyperion","n":66,"s":"1.2G"},{"a":"Taleb, Nassim Nicholas","t":"Černá labuť","n":33,"s":"1.1G"},{"a":"Tevis, Walter","t":"Zpěv drozda","n":33,"s":"621M"},{"a":"van Gulik, Robert","t":"Vražda na lotosovém jezírku","n":2,"s":"55M"},{"a":"Walker, Matthew","t":"Proč spíme","n":38,"s":"798M"},{"a":"Waltari, Mika","t":"Egypťan Sinuhet","n":147,"s":"2.6G"},{"a":"Weir, Andy","t":"Artemis","n":27,"s":"647M"},{"a":"Weir, Andy","t":"Marťan","n":38,"s":"646M"},{"a":"Weir, Andy","t":"Spasitel","n":30,"s":"1.1G"},{"a":"—","t":"ZIP","n":0,"s":"5.0G"}];
-const generated = '17.02.2026 19:34';
-function slugify(s) {
-  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,' ');
+const books=[{"a":"Adams, Douglas","t":"Stopařův průvodce po Galaxii","n":36,"s":"532M","b":544888,"d":1708622138,"c":1},{"a":"Adler-Olsen, Jussi","t":"Chlorid sodný","n":52,"s":"883M","b":903904,"d":1708622320,"c":1},{"a":"Adler-Olsen, Jussi","t":"Marco","n":45,"s":"671M","b":687012,"d":1708622322,"c":1},{"a":"Adler-Olsen, Jussi","t":"Nesmírný","n":55,"s":"798M","b":817212,"d":1708622323,"c":1},{"a":"Adler-Olsen, Jussi","t":"Oběť 2117","n":73,"s":"1.0G","b":1084660,"d":1708622327,"c":1},{"a":"Adler-Olsen, Jussi","t":"Selfies","n":64,"s":"925M","b":947696,"d":1708622329,"c":1},{"a":"Adler-Olsen, Jussi","t":"Složka 64","n":59,"s":"1.1G","b":1149296,"d":1771306631,"c":1},{"a":"Adler-Olsen, Jussi","t":"Vzkaz v láhvi","n":53,"s":"1.0G","b":1062216,"d":1771306631,"c":1},{"a":"Adler-Olsen, Jussi","t":"Zabijáci","n":44,"s":"562M","b":575052,"d":1708622335,"c":1},{"a":"Adler-Olsen, Jussi","t":"Žena v kleci","n":40,"s":"513M","b":525792,"d":1708622337,"c":1},{"a":"Aldiss, Brian Wilson","t":"Nonstop","n":17,"s":"505M","b":516896,"d":1708622065,"c":1},{"a":"Asimov, Isaac","t":"Nadace","n":26,"s":"484M","b":495464,"d":1708622068,"c":1},{"a":"Bárdy, Peter","t":"Zuzana Čaputová: Odvaha k ľudskosti","n":46,"s":"573M","b":586360,"d":1771353243,"c":0},{"a":"Belmondo, Jean-Paul","t":"Mých 1000 životů","n":24,"s":"509M","b":521640,"d":1752030714,"c":1},{"a":"Bjork, Samuel","t":"Sova","n":43,"s":"680M","b":696168,"d":1752030843,"c":1},{"a":"Boček, Evžen","t":"Poslední aristokratka","n":8,"s":"222M","b":227752,"d":1708622070,"c":1},{"a":"Bosco, Henri","t":"Měsíční pahorek v dlani","n":8,"s":"107M","b":109316,"d":1708622069,"c":0},{"a":"Brown, Dan","t":"Andělé a démoni","n":8,"s":"405M","b":414816,"d":1708622071,"c":1},{"a":"Brown, Dan","t":"Da Vinciho kód","n":16,"s":"433M","b":443260,"d":1771306630,"c":1},{"a":"Brown, Dan","t":"Inferno","n":107,"s":"969M","b":992160,"d":1708622074,"c":1},{"a":"Brown, Dan","t":"Pavučina lží","n":150,"s":"1.0G","b":1097896,"d":1708622077,"c":1},{"a":"Brown, Dan","t":"Počátek","n":107,"s":"1.1G","b":1104228,"d":1757615653,"c":1},{"a":"Brown, Dan","t":"Tajemství všech tajemství","n":141,"s":"821M","b":840692,"d":1759319863,"c":1},{"a":"Brown, Dan","t":"Ztracený symbol","n":154,"s":"1.1G","b":1163572,"d":1771306631,"c":1},{"a":"Bryson, Bill","t":"Ľudské telo","n":50,"s":"1.0G","b":1045652,"d":1708622086,"c":1},{"a":"Bryson, Bill","t":"Stručná história takmer všetkého","n":50,"s":"1.2G","b":1302212,"d":1708622083,"c":1},{"a":"Bukowski, Charles","t":"Těžké časy","n":10,"s":"93M","b":95228,"d":1708622086,"c":1},{"a":"Bulgakov, Michail","t":"Mistr a Markétka","n":3,"s":"204M","b":209148,"d":1708622086,"c":1},{"a":"Camus, Albert","t":"Nedorozumění","n":1,"s":"89M","b":90972,"d":1708622087,"c":1},{"a":"Carter, Forrest","t":"Odvedu vás do Sierry Madre","n":22,"s":"782M","b":800564,"d":1708622171,"c":1},{"a":"Carter, Forrest","t":"Škola Malého stromu","n":21,"s":"400M","b":409304,"d":1708622171,"c":1},{"a":"Castaneda, Carlos","t":"Cesta do Ixtlanu","n":30,"s":"535M","b":548020,"d":1708622088,"c":1},{"a":"Castaneda, Carlos","t":"Oddělená skutečnost","n":31,"s":"546M","b":559244,"d":1708622089,"c":1},{"a":"Castaneda, Carlos","t":"Učení dona Juana","n":31,"s":"539M","b":551444,"d":1708622090,"c":1},{"a":"Cch'-sin, Liou","t":"Problém tří těles","n":35,"s":"780M","b":798380,"d":1708622095,"c":1},{"a":"Cch'-sin, Liou","t":"Temný les","n":35,"s":"1.2G","b":1237712,"d":1708622098,"c":1},{"a":"Cch'-sin, Liou","t":"Vzpomínka na Zemi","n":83,"s":"867M","b":887364,"d":1708622100,"c":1},{"a":"Chandler, Raymond","t":"Hluboký spánek","n":32,"s":"499M","b":511060,"d":1708622102,"c":1},{"a":"Child, Lee","t":"A přece nezemřeš","n":46,"s":"1.5G","b":1533976,"d":1708622105,"c":1},{"a":"Child, Lee","t":"Nevracej se","n":69,"s":"681M","b":697224,"d":1771266026,"c":1},{"a":"Child, Lee","t":"Volný pád","n":85,"s":"738M","b":755380,"d":1708622107,"c":1},{"a":"Christie, Agatha","t":"Herkulovské úkoly pro Hercula Poirota","n":13,"s":"542M","b":554848,"d":1752030772,"c":1},{"a":"Christie, Agatha","t":"Královský rubín","n":3,"s":"103M","b":105584,"d":1752030707,"c":1},{"a":"Christie, Agatha","t":"Krysy","n":1,"s":"61M","b":62528,"d":1752030707,"c":1},{"a":"Christie, Agatha","t":"Opona","n":56,"s":"447M","b":457472,"d":1752030710,"c":1},{"a":"Christie, Agatha","t":"Vražda v postranní ulici","n":16,"s":"141M","b":143936,"d":1752030711,"c":1},{"a":"Cima, Anna","t":"Probudím se na Šibuji","n":58,"s":"596M","b":609896,"d":1720636689,"c":1},{"a":"Clancy, Tom","t":"Vysoká hra patriotů","n":26,"s":"1.8G","b":1866708,"d":1708622115,"c":1},{"a":"Clavell, James","t":"Šógun","n":67,"s":"3.3G","b":3502828,"d":1708622124,"c":1},{"a":"Coelho, Paulo","t":"Alchymista","n":29,"s":"227M","b":232256,"d":1771306714,"c":1},{"a":"Connelly, Michael","t":"Čakanie","n":57,"s":"700M","b":717236,"d":1771303012,"c":1},{"a":"Connelly, Michael","t":"Černý led","n":48,"s":"764M","b":782648,"d":1757615613,"c":1},{"a":"Connelly, Michael","t":"Hodina duchov","n":47,"s":"633M","b":647856,"d":1708622126,"c":0},{"a":"Connelly, Michael","t":"Kufrové tango","n":29,"s":"790M","b":809452,"d":1760728522,"c":1},{"a":"Connelly, Michael","t":"Kvapka","n":42,"s":"657M","b":673152,"d":1771303005,"c":1},{"a":"Connelly, Michael","t":"Mesto kostí","n":54,"s":"697M","b":713968,"d":1771303009,"c":1},{"a":"Connelly, Michael","t":"Posledný kojot","n":52,"s":"797M","b":816012,"d":1760728525,"c":1},{"a":"Connelly, Michael","t":"Púštna hviezda","n":110,"s":"607M","b":621928,"d":1708622128,"c":0},{"a":"Connelly, Michael","t":"Temná ozvena","n":59,"s":"863M","b":883216,"d":1762715973,"c":1},{"a":"Connelly, Michael","t":"Výstraha","n":50,"s":"637M","b":652496,"d":1708622129,"c":1},{"a":"Cook, Robin","t":"Invaze z galaxie","n":38,"s":"339M","b":346912,"d":1708622130,"c":1},{"a":"Cornwell, Bernard","t":"Azincourt","n":21,"s":"1.0G","b":1098612,"d":1708622133,"c":1},{"a":"Cousteau, Jacques-Yves","t":"Život na konci sveta","n":13,"s":"482M","b":493720,"d":1708622134,"c":1},{"a":"Dahl, Roald","t":"Host do domu","n":8,"s":"295M","b":301632,"d":1771306631,"c":1},{"a":"Dán, Dominik","t":"Básnik","n":69,"s":"649M","b":664480,"d":1708622146,"c":1},{"a":"Dán, Dominik","t":"Beštia","n":26,"s":"961M","b":984144,"d":1708622142,"c":1},{"a":"Dán, Dominik","t":"Cela číslo 17","n":39,"s":"622M","b":637052,"d":1708622148,"c":1},{"a":"Dán, Dominik","t":"Jednou nohou v hrobe","n":73,"s":"652M","b":667316,"d":1708622149,"c":1},{"a":"Dán, Dominik","t":"Krv nie je voda","n":68,"s":"593M","b":607508,"d":1708622162,"c":1},{"a":"Dán, Dominik","t":"Mucha","n":49,"s":"614M","b":628872,"d":1708622151,"c":1},{"a":"Dán, Dominik","t":"Mucholapka","n":52,"s":"602M","b":616096,"d":1708622152,"c":1},{"a":"Dán, Dominik","t":"Nežná fatamorgána","n":59,"s":"544M","b":557272,"d":1708622154,"c":1},{"a":"Dán, Dominik","t":"Popol všetkých zarovná","n":37,"s":"1.0G","b":1032604,"d":1708622156,"c":1},{"a":"Dán, Dominik","t":"Rudý kapitán","n":33,"s":"744M","b":762352,"d":1708622158,"c":1},{"a":"Dán, Dominik","t":"Smrť na druhom brehu","n":68,"s":"602M","b":616060,"d":1708622159,"c":1},{"a":"Dán, Dominik","t":"Uzol","n":67,"s":"569M","b":582796,"d":1708622161,"c":1},{"a":"de la Motte, Anders","t":"Game","n":34,"s":"509M","b":521432,"d":1771353239,"c":1},{"a":"Deaver, Jeffery","t":"Ďáblova slza","n":42,"s":"528M","b":540992,"d":1771303046,"c":1},{"a":"Deaver, Jeffery","t":"Katedrála hrůzy","n":43,"s":"603M","b":617132,"d":1771303015,"c":1},{"a":"Deaver, Jeffery","t":"Kříže u cesty","n":57,"s":"752M","b":770472,"d":1771303019,"c":1},{"a":"Deaver, Jeffery","t":"Ocelový polibek","n":72,"s":"922M","b":944456,"d":1771303023,"c":1},{"a":"Deaver, Jeffery","t":"Panoptikum","n":40,"s":"634M","b":649388,"d":1771303026,"c":1},{"a":"Deaver, Jeffery","t":"Příští oběti","n":104,"s":"746M","b":764184,"d":1771303031,"c":1},{"a":"Deaver, Jeffery","t":"Sběratel kůží","n":84,"s":"738M","b":755636,"d":1771303035,"c":1},{"a":"Deaver, Jeffery","t":"Tvůj stín","n":87,"s":"745M","b":762688,"d":1771303038,"c":1},{"a":"Deaver, Jeffery","t":"Zahrada bestií","n":63,"s":"913M","b":935088,"d":1771303043,"c":1},{"a":"Defoe, Daniel","t":"Robinson Crusoe","n":1,"s":"72M","b":73972,"d":1708622135,"c":1},{"a":"DeMille, Nelson","t":"Noční pád","n":19,"s":"360M","b":368348,"d":1708622136,"c":1},{"a":"Dobrovoda, Ľubo","t":"Ja malkáč","n":34,"s":"428M","b":438144,"d":1708622137,"c":1},{"a":"Dostojevskij, Fjodor Michajlovič","t":"Idiot","n":2,"s":"49M","b":50152,"d":1708622137,"c":1},{"a":"Doyle, Arthur Conan","t":"15 případů Sherlocka Holmese podruhé","n":15,"s":"277M","b":283232,"d":1771353233,"c":0},{"a":"Doyle, Arthur Conan","t":"Hrůzostrašné příběhy","n":5,"s":"180M","b":184804,"d":1752030747,"c":1},{"a":"Dusse, Karsten","t":"Sústreď sa na vraždu","n":37,"s":"505M","b":517260,"d":1708622140,"c":0},{"a":"Eco, Umberto","t":"Jméno růže","n":9,"s":"323M","b":330568,"d":1771353240,"c":1},{"a":"Ferrante, Elena","t":"Geniální přítelkyně","n":82,"s":"700M","b":717072,"d":1708622164,"c":1},{"a":"Ferrante, Elena","t":"Příběh nového jména","n":125,"s":"1.0G","b":1047544,"d":1708622166,"c":1},{"a":"Ferrante, Elena","t":"Příběh těch, co odcházejí, a těch, kteří zůstanou","n":123,"s":"875M","b":896196,"d":1708622169,"c":0},{"a":"Forsyth, Frederick","t":"Čtvrtý protokol","n":27,"s":"1.0G","b":1065096,"d":1708622174,"c":1},{"a":"Forsyth, Frederick","t":"Žádné stopy","n":43,"s":"643M","b":658624,"d":1708622175,"c":1},{"a":"Francis, Dick","t":"V nemilosti","n":38,"s":"516M","b":528304,"d":1752030740,"c":1},{"a":"Gaiman, Neil","t":"American Gods","n":121,"s":"1.2G","b":1307176,"d":1737561158,"c":1},{"a":"Gaiman, Neil","t":"Nikdykde","n":73,"s":"772M","b":790368,"d":1708622179,"c":1},{"a":"Galeotti, Mark","t":"Musíme si promluvit o Putinovi","n":6,"s":"105M","b":107052,"d":1708622179,"c":1},{"a":"García Márquez, Gabriel","t":"Sto rokov samoty","n":23,"s":"870M","b":891276,"d":1708622255,"c":1},{"a":"Gibson, William","t":"Neuromancer","n":38,"s":"698M","b":715076,"d":1727501018,"c":1},{"a":"Giono, Jean","t":"Muž, ktorý sadil stromy","n":1,"s":"27M","b":27772,"d":1708622179,"c":1},{"a":"Golden, Arthur","t":"Gejša","n":35,"s":"1.1G","b":1171672,"d":1737561536,"c":1},{"a":"Greaney, Mark","t":"Na mušce","n":53,"s":"806M","b":825088,"d":1757615575,"c":1},{"a":"Greaney, Mark","t":"Neřízená střela","n":59,"s":"924M","b":946096,"d":1757615585,"c":1},{"a":"Greaney, Mark","t":"Šedý muž","n":38,"s":"886M","b":907240,"d":1757615571,"c":1},{"a":"Haig, Matt","t":"Půlnoční knihovna","n":31,"s":"591M","b":605072,"d":1708622183,"c":1},{"a":"Hailey, Arthur","t":"Detektiv","n":33,"s":"1.1G","b":1147756,"d":1708622185,"c":1},{"a":"Hailey, Arthur","t":"Hotel","n":25,"s":"995M","b":1018912,"d":1708622187,"c":1},{"a":"Hailey, Arthur","t":"Let do nebezpečí","n":2,"s":"133M","b":136244,"d":1708622188,"c":1},{"a":"Hailey, Arthur","t":"Penězoměnci","n":30,"s":"1.2G","b":1236864,"d":1708622191,"c":1},{"a":"Hall, Ernst","t":"Zvony smrti","n":6,"s":"157M","b":160948,"d":1708622191,"c":1},{"a":"Harari, Yuval Noah","t":"21 lekcí pro 21. století","n":40,"s":"650M","b":665948,"d":1757615756,"c":1},{"a":"Harari, Yuval Noah","t":"Sapiens, Stručné dějiny lidstva","n":20,"s":"872M","b":892728,"d":1708622196,"c":1},{"a":"Hemingway, Ernest","t":"Starec a more","n":3,"s":"302M","b":309720,"d":1708622197,"c":1},{"a":"Herbert, Frank","t":"Duna","n":76,"s":"1.2G","b":1245944,"d":1708622200,"c":1},{"a":"Horst, Jørn Lier","t":"Zaslepení","n":89,"s":"701M","b":717676,"d":1752030783,"c":1},{"a":"Isaacson, Walter","t":"Steve Jobs","n":82,"s":"1.4G","b":1489608,"d":1708622203,"c":1},{"a":"Izumi, Kjoka","t":"Mnich z hory Koja","n":1,"s":"163M","b":167300,"d":1708622203,"c":1},{"a":"Jakovlev, Alexandr","t":"Rusko plné křížů","n":8,"s":"225M","b":230552,"d":1708622204,"c":1},{"a":"Jánský, Filip","t":"Nebeští jezdci","n":10,"s":"286M","b":292536,"d":1708622206,"c":1},{"a":"Jirotka, Zdeněk","t":"Muž se psem","n":10,"s":"302M","b":309628,"d":1708622205,"c":1},{"a":"Jirotka, Zdeněk","t":"Saturnin","n":3,"s":"219M","b":224260,"d":1708622206,"c":1},{"a":"Jonasson, Jonas","t":"Analfabetka, která uměla počítat","n":25,"s":"704M","b":721100,"d":1752030777,"c":1},{"a":"Kapitáňová, Daniela","t":"Samko Tále - Kniha o cintoríne","n":11,"s":"296M","b":302872,"d":1752030839,"c":1},{"a":"Karika, Jozef","t":"Trhlina","n":39,"s":"662M","b":677560,"d":1708622208,"c":1},{"a":"Kepler, Lars","t":"Hypnotizér","n":71,"s":"908M","b":929620,"d":1708622211,"c":1},{"a":"Kepler, Lars","t":"Lazar","n":98,"s":"1.1G","b":1160776,"d":1708622214,"c":1},{"a":"Kepler, Lars","t":"Lovec králíků","n":55,"s":"1.1G","b":1178376,"d":1708622217,"c":1},{"a":"Kepler, Lars","t":"Paganiniho smlouva","n":48,"s":"650M","b":665968,"d":1708622218,"c":1},{"a":"Kepler, Lars","t":"Písečný muž","n":42,"s":"660M","b":675788,"d":1708622222,"c":1},{"a":"Kepler, Lars","t":"Playground","n":84,"s":"698M","b":715196,"d":1708622220,"c":1},{"a":"Kepler, Lars","t":"Stalker","n":74,"s":"948M","b":970608,"d":1708622224,"c":1},{"a":"Kepler, Lars","t":"Svědkyně ohně","n":38,"s":"1.3G","b":1329512,"d":1708622228,"c":1},{"a":"King, Stephen","t":"Osvícení","n":70,"s":"1.0G","b":1084124,"d":1708622230,"c":1},{"a":"King, Stephen","t":"Řbitov zviřátek","n":40,"s":"1.1G","b":1139784,"d":1752030847,"c":1},{"a":"King, Stephen","t":"Vykoupení z věznice Shawshank","n":43,"s":"367M","b":375624,"d":1771306631,"c":1},{"a":"King, Stephen & Straub, Peter","t":"Černý dům","n":30,"s":"1.5G","b":1559596,"d":1752030851,"c":1},{"a":"King, Stephen & Straub, Peter","t":"Talisman","n":75,"s":"1.5G","b":1542068,"d":1771306632,"c":1},{"a":"Kipling, Rudyard","t":"Bajky i Nebajky","n":5,"s":"93M","b":94752,"d":1708622232,"c":1},{"a":"Kóbó, Abe","t":"Kouzelná křída","n":1,"s":"27M","b":27476,"d":1708622234,"c":1},{"a":"Kundera, Milan","t":"Nesmrtelnost","n":114,"s":"736M","b":753672,"d":1708622234,"c":1},{"a":"Lagercrantz, David","t":"Dívka v pavoučí síti","n":56,"s":"816M","b":835768,"d":1752030732,"c":1},{"a":"Lagercrantz, David","t":"Muž který hledal svůj stín","n":54,"s":"1.2G","b":1236900,"d":1752030737,"c":1},{"a":"Larsson, Stieg","t":"Dievča, ktoré sa hralo s ohňom","n":58,"s":"1.2G","b":1259252,"d":1771306632,"c":1},{"a":"Larsson, Stieg","t":"Dívka, která kopla do vosího hnízda","n":62,"s":"917M","b":939184,"d":1708622240,"c":1},{"a":"Larsson, Stieg","t":"Muži, ktorí nenávidia ženy","n":55,"s":"1.2G","b":1243832,"d":1771306714,"c":1},{"a":"Lee, Min Jin","t":"Pačinko","n":58,"s":"1.0G","b":1076120,"d":1737561605,"c":1},{"a":"Lem, Stanislav","t":"Astronauti","n":1,"s":"41M","b":42104,"d":1708622243,"c":1},{"a":"Lem, Stanislav","t":"Měsíční noc","n":1,"s":"56M","b":56972,"d":1708622243,"c":1},{"a":"Lem, Stanislav","t":"Solaris","n":13,"s":"479M","b":490952,"d":1708622245,"c":1},{"a":"Mankell, Henning","t":"Firewall","n":58,"s":"1.0G","b":1057872,"d":1752030762,"c":1},{"a":"Mankell, Henning","t":"Pátá žena","n":55,"s":"771M","b":789396,"d":1752030766,"c":1},{"a":"Mankell, Henning","t":"Psi z Rigy","n":0,"s":"68K","b":68,"d":1708622249,"c":1},{"a":"Mankell, Henning","t":"Ve slepé uličce","n":40,"s":"954M","b":977236,"d":1752030770,"c":1},{"a":"Mankell, Henning","t":"Vrazi bez tváře","n":0,"s":"96K","b":96,"d":1708622253,"c":1},{"a":"Martin, George R.R.","t":"Hra o trůny","n":288,"s":"2.4G","b":2524876,"d":1708622263,"c":1},{"a":"May, Peter","t":"Běžkyně","n":58,"s":"1.0G","b":1098252,"d":1771306632,"c":1},{"a":"May, Peter","t":"Černé světlo","n":29,"s":"556M","b":569072,"d":1708622286,"c":1},{"a":"May, Peter","t":"Čtvrtá oběť","n":12,"s":"605M","b":619060,"d":1727501436,"c":1},{"a":"May, Peter","t":"Entomologův odkaz","n":30,"s":"559M","b":572500,"d":1708622264,"c":0},{"a":"May, Peter","t":"Hadohlavec","n":48,"s":"685M","b":701436,"d":1727512051,"c":1},{"a":"May, Peter","t":"Kritik","n":24,"s":"552M","b":564984,"d":1708622265,"c":1},{"a":"May, Peter","t":"Muž z ostrova Lewis","n":57,"s":"633M","b":647736,"d":1708622267,"c":1},{"a":"May, Peter","t":"Nezvratné alibi","n":55,"s":"610M","b":624380,"d":1708622268,"c":1},{"a":"May, Peter","t":"Noční brána","n":54,"s":"804M","b":823612,"d":1708622270,"c":1},{"a":"May, Peter","t":"Ostrov Entry","n":59,"s":"1.3G","b":1313268,"d":1708622273,"c":1},{"a":"May, Peter","t":"Pan ohne","n":27,"s":"632M","b":647352,"d":1708622276,"c":1},{"a":"May, Peter","t":"Pekingský rozparovač","n":59,"s":"1.0G","b":1076604,"d":1771306632,"c":1},{"a":"May, Peter","t":"Šachové figurky","n":53,"s":"604M","b":618596,"d":1708622287,"c":1},{"a":"May, Peter","t":"Sál smrti","n":37,"s":"649M","b":664596,"d":1727507555,"c":1},{"a":"May, Peter","t":"Skála","n":44,"s":"1.1G","b":1160808,"d":1708622279,"c":1},{"a":"May, Peter","t":"Svatba duchů","n":13,"s":"252M","b":257844,"d":1727525289,"c":1},{"a":"May, Peter","t":"Umrlčí cesta","n":44,"s":"654M","b":670016,"d":1708622280,"c":1},{"a":"May, Peter","t":"Výjimeční lidé","n":36,"s":"635M","b":649912,"d":1708622283,"c":1},{"a":"May, Peter","t":"Zpětný ráz","n":31,"s":"518M","b":530084,"d":1708622285,"c":1},{"a":"McBain, Ed","t":"Překupník","n":16,"s":"393M","b":402212,"d":1708622288,"c":1},{"a":"McCarthy, Cormac","t":"Cesta","n":43,"s":"566M","b":579776,"d":1708622290,"c":1},{"a":"McCarthy, Cormac","t":"Tahle země není pro starý","n":13,"s":"473M","b":484468,"d":1708622291,"c":1},{"a":"McEwan, Ian","t":"Nevinný","n":5,"s":"204M","b":209052,"d":1708622292,"c":1},{"a":"Molière","t":"Lakomec","n":1,"s":"52M","b":53548,"d":1752030816,"c":1},{"a":"Monger, Christopher","t":"Angličan, který vylezl na kopec, ale slezl z hory","n":10,"s":"147M","b":150540,"d":1708622292,"c":1},{"a":"Murakami, Haruki","t":"Bezbarvý Cukuru Tazaki a jeho léta putování","n":30,"s":"555M","b":568728,"d":1771266017,"c":1},{"a":"Murakami, Haruki","t":"Norské dřevo","n":29,"s":"582M","b":596040,"d":1708622294,"c":1},{"a":"Murakami, Haruki","t":"Tancuj tancuj tancuj","n":78,"s":"1.2G","b":1269692,"d":1724442596,"c":1},{"a":"Nesbø, Jo","t":"Červenka","n":50,"s":"810M","b":829432,"d":1708622313,"c":1},{"a":"Nesbø, Jo","t":"Krev na sněhu","n":21,"s":"406M","b":416080,"d":1708622295,"c":1},{"a":"Nesbø, Jo","t":"Lovci hlav","n":29,"s":"483M","b":494812,"d":1708622296,"c":1},{"a":"Nesbø, Jo","t":"Macbeth (2018)","n":60,"s":"961M","b":983992,"d":1708622298,"c":1},{"a":"Nesbø, Jo","t":"Nemesis","n":6,"s":"304M","b":311588,"d":1708622299,"c":1},{"a":"Nesbø, Jo","t":"Netopýr","n":41,"s":"604M","b":618608,"d":1708622302,"c":1},{"a":"Nesbø, Jo","t":"Policie","n":52,"s":"778M","b":796732,"d":1708622303,"c":1},{"a":"Nesbø, Jo","t":"Přízrak","n":67,"s":"820M","b":839460,"d":1708622305,"c":1},{"a":"Nesbø, Jo","t":"Půlnoční slunce","n":19,"s":"433M","b":443000,"d":1708622306,"c":1},{"a":"Nesbø, Jo","t":"Snehuliak","n":41,"s":"772M","b":790568,"d":1708622309,"c":1},{"a":"Nesbø, Jo","t":"Švábi","n":53,"s":"601M","b":615332,"d":1708622314,"c":1},{"a":"Nesbø, Jo","t":"Syn","n":44,"s":"917M","b":939440,"d":1708622311,"c":1},{"a":"Nesbø, Jo","t":"Žízeň","n":62,"s":"1.1G","b":1107132,"d":1708622318,"c":1},{"a":"Orwell, George","t":"1984","n":23,"s":"580M","b":593888,"d":1708622338,"c":1},{"a":"Orwell, George","t":"Farma zvířat","n":9,"s":"448M","b":458792,"d":1708622339,"c":1},{"a":"Owens, Delia","t":"Kde raky spievajú","n":58,"s":"659M","b":674452,"d":1708622341,"c":0},{"a":"Pratchett, Terry","t":"Barva kouzel","n":85,"s":"496M","b":507836,"d":1771306633,"c":1},{"a":"Pratchett, Terry","t":"Čaroprávnost","n":60,"s":"1.1G","b":1199208,"d":1771306633,"c":1},{"a":"Pratchett, Terry","t":"Lehké fantastično","n":81,"s":"705M","b":721452,"d":1771306633,"c":1},{"a":"Preston, Douglas","t":"Údolí tyranosaura","n":1,"s":"659M","b":674572,"d":1759342476,"c":1},{"a":"Preston, Douglas & Child, Lincoln","t":"Zátiší s vránami","n":82,"s":"1.5G","b":1606040,"d":1708622111,"c":1},{"a":"Prose, Nita","t":"Pokojská","n":41,"s":"656M","b":672008,"d":1708622348,"c":1},{"a":"Pullman, Philip","t":"Zlatý kompas","n":98,"s":"817M","b":836852,"d":1708622351,"c":1},{"a":"Ransome, Arthur","t":"Boj o ostrov","n":5,"s":"84M","b":86400,"d":1708622352,"c":1},{"a":"Ransome, Arthur","t":"Klub Lysek","n":5,"s":"88M","b":90576,"d":1708622352,"c":1},{"a":"Ransome, Arthur","t":"Trosečníci z Vlaštovky","n":5,"s":"87M","b":89484,"d":1708622352,"c":1},{"a":"Ransome, Arthur","t":"Zamrzlá loď kapitána Flinta","n":5,"s":"85M","b":87356,"d":1708622352,"c":1},{"a":"Redondo, Dolores","t":"Neviditelný strážce","n":43,"s":"842M","b":862436,"d":1708622354,"c":1},{"a":"Rosten, Leo","t":"Pan Kaplan ma stále třídu rád","n":10,"s":"232M","b":237316,"d":1752030838,"c":1},{"a":"Rowling, J.K.","t":"Harry Potter a Fénixův řád","n":38,"s":"1.0G","b":1068736,"d":1708622357,"c":1},{"a":"Rowling, J.K.","t":"Harry Potter a Kameň mudrcov","n":17,"s":"450M","b":460984,"d":1708622358,"c":1},{"a":"Rowling, J.K.","t":"Harry Potter a Ohnivý pohár","n":37,"s":"666M","b":682200,"d":1708622360,"c":1},{"a":"Rowling, J.K.","t":"Harry Potter a Princ Dvojí Krve","n":30,"s":"1.3G","b":1394972,"d":1708622364,"c":1},{"a":"Rowling, J.K.","t":"Harry Potter a Relikvie smrti","n":72,"s":"1.6G","b":1682320,"d":1771306633,"c":1},{"a":"Rowling, J.K.","t":"Harry Potter a Tajemná komnata","n":18,"s":"358M","b":367088,"d":1708622374,"c":1},{"a":"Rowling, J.K.","t":"Harry Potter a vězeň z Azkabanu","n":22,"s":"938M","b":960360,"d":1708622376,"c":1},{"a":"Saint-Exupéry, Antoine de","t":"Malý princ","n":4,"s":"48M","b":49216,"d":1708622169,"c":1},{"a":"Sapkowski, Andrzej","t":"Bouřková sezóna","n":65,"s":"548M","b":561292,"d":1708622378,"c":1},{"a":"Sapkowski, Andrzej","t":"Čas opovržení","n":61,"s":"528M","b":541176,"d":1708622380,"c":1},{"a":"Sapkowski, Andrzej","t":"Křest ohněm","n":66,"s":"524M","b":536168,"d":1708622382,"c":1},{"a":"Sapkowski, Andrzej","t":"Krev elfů","n":60,"s":"492M","b":503724,"d":1708622383,"c":1},{"a":"Sapkowski, Andrzej","t":"Meč osudu","n":92,"s":"700M","b":717132,"d":1708622385,"c":1},{"a":"Sapkowski, Andrzej","t":"Paní jezera","n":112,"s":"880M","b":900864,"d":1708622387,"c":1},{"a":"Sapkowski, Andrzej","t":"Poslední přání","n":48,"s":"446M","b":456692,"d":1708622388,"c":1},{"a":"Sapkowski, Andrzej","t":"Věž vlaštovky","n":91,"s":"722M","b":739516,"d":1708622390,"c":1},{"a":"Shakespeare, William","t":"Othello","n":1,"s":"139M","b":142628,"d":1752030860,"c":1},{"a":"Shakespeare, William","t":"Rómeo a Júlia","n":1,"s":"149M","b":152448,"d":1752030860,"c":1},{"a":"Simenon, Georges","t":"4x komisař Maigret počtvrté","n":15,"s":"218M","b":223700,"d":1771353234,"c":1},{"a":"Simenon, Georges","t":"5x komisař Maigret","n":15,"s":"287M","b":294092,"d":1771353237,"c":1},{"a":"Simenon, Georges","t":"5x komisař Maigret podruhé","n":18,"s":"321M","b":329088,"d":1771353235,"c":1},{"a":"Simenon, Georges","t":"Maigret a jeho mrtvý","n":19,"s":"328M","b":335488,"d":1708622391,"c":1},{"a":"Simenon, Georges","t":"S úctou Picpus","n":14,"s":"119M","b":121832,"d":1708622391,"c":1},{"a":"Simmons, Dan","t":"Hyperion","n":66,"s":"1.2G","b":1287528,"d":1770236175,"c":1},{"a":"Sumino, Yoru","t":"Mata, onaji yume wo miteita","n":21,"s":"488M","b":500172,"d":1754070818,"c":1},{"a":"Taleb, Nassim Nicholas","t":"Černá labuť","n":33,"s":"1.1G","b":1171944,"d":1708622394,"c":1},{"a":"Tevis, Walter","t":"Zpěv drozda","n":33,"s":"621M","b":636240,"d":1727500918,"c":1},{"a":"van Gulik, Robert","t":"Vražda na lotosovém jezírku","n":2,"s":"55M","b":56488,"d":1752030757,"c":0},{"a":"Walker, Matthew","t":"Proč spíme","n":38,"s":"798M","b":816892,"d":1720636699,"c":1},{"a":"Waltari, Mika","t":"Egypťan Sinuhet","n":147,"s":"2.6G","b":2756068,"d":1771302493,"c":1},{"a":"Weir, Andy","t":"Artemis","n":27,"s":"647M","b":662268,"d":1757615539,"c":1},{"a":"Weir, Andy","t":"Marťan","n":38,"s":"646M","b":661716,"d":1757615624,"c":1},{"a":"Weir, Andy","t":"Spasitel","n":30,"s":"1.1G","b":1154108,"d":1708622398,"c":1}];
+const generated='17.02.2026 20:10';
+const totalAudio=10913;
+const totalSize='168G';
+/* ── Icons ── */
+const IC_SUN='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+const IC_MOON='<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const IC_BOOK='<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
+
+/* ── State ── */
+let sortMode='author', filterQ='', observer=null;
+const collator=new Intl.Collator('cs',{sensitivity:'base'});
+
+/* ── Theme ── */
+function initTheme(){
+  const s=localStorage.getItem('ab-theme');
+  const dark=s?s==='dark':window.matchMedia('(prefers-color-scheme:dark)').matches;
+  setTheme(dark?'dark':'light');
 }
-function dbLink(author, title) {
-  const surname = author.split(',')[0].trim();
-  return 'https://www.databazeknih.cz/search?q=' + encodeURIComponent(slugify(title + ' ' + surname));
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('ab-theme',t);
+  document.getElementById('theme-toggle').innerHTML=t==='dark'?IC_SUN:IC_MOON;
 }
-function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-function render(filter) {
-  const list = document.getElementById('list');
-  const q = (filter||'').toLowerCase();
-  let html = '', currentAuthor = '', shown = 0;
-  const authors = new Set();
-  books.forEach(b => {
-    const haystack = (b.a + ' ' + b.t).toLowerCase();
-    if (q && !haystack.includes(q)) return;
-    authors.add(b.a);
-    if (b.a !== currentAuthor) {
-      currentAuthor = b.a;
-      html += '<div class="author-group"><div class="author-name">' + esc(b.a) + '</div>';
+function toggleTheme(){
+  setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+}
+
+/* ── Helpers ── */
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function stripDia(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function slugify(s){return stripDia(s).replace(/[^a-zA-Z0-9 ]/g,'').trim().replace(/\s+/g,' ');}
+function letterOf(author){return stripDia(author.charAt(0)).toUpperCase();}
+function dbLink(a,t){
+  const surname=a.split(',')[0].trim();
+  return 'https://www.databazeknih.cz/search?q='+encodeURIComponent(slugify(t+' '+surname));
+}
+function coverSlug(a,t){return (a+' - '+t).replace(/[^a-zA-Z0-9]/g,'_');}
+function fmtDate(epoch){
+  if(!epoch)return '—';
+  const d=new Date(epoch*1000);
+  return d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear();
+}
+
+/* ── Sort ── */
+function sortBooks(arr,mode){
+  const c=[...arr];
+  switch(mode){
+    case 'author': c.sort((a,b)=>collator.compare(a.a,b.a)||collator.compare(a.t,b.t)); break;
+    case 'title':  c.sort((a,b)=>collator.compare(a.t,b.t)); break;
+    case 'tracks': c.sort((a,b)=>(b.n-a.n)||collator.compare(a.a,b.a)); break;
+    case 'size':   c.sort((a,b)=>(b.b-a.b)||collator.compare(a.a,b.a)); break;
+    case 'date':   c.sort((a,b)=>(b.d-a.d)||collator.compare(a.a,b.a)); break;
+  }
+  return c;
+}
+
+/* ── Alpha Nav ── */
+function buildAlpha(visible){
+  const present=new Set();
+  visible.forEach(b=>{if(b.a)present.add(letterOf(b.a));});
+  const nav=document.getElementById('alpha-nav');
+  let h='';
+  for(let i=65;i<=90;i++){
+    const ch=String.fromCharCode(i), has=present.has(ch);
+    h+='<button class="alpha-btn'+(has?'':' disabled')+'" data-letter="'+ch+'"'+(has?'':' disabled')+'>'+ch+'</button>';
+  }
+  nav.innerHTML=h;
+}
+
+function setupScrollSpy(){
+  if(observer)observer.disconnect();
+  const sections=document.querySelectorAll('.letter-section[data-letter]');
+  if(!sections.length)return;
+  observer=new IntersectionObserver(entries=>{
+    for(const e of entries){
+      if(e.isIntersecting){
+        const l=e.target.getAttribute('data-letter');
+        document.querySelectorAll('.alpha-btn').forEach(b=>b.classList.toggle('active',b.dataset.letter===l));
+      }
     }
-    html += '<a class="book" href="' + dbLink(b.a, b.t) + '" target="_blank" rel="noopener">'
-      + '<span class="book-title">' + esc(b.t) + '</span>'
-      + '<span class="book-meta">'
-      + '<span class="book-tracks">' + (b.n || '\u2014') + ' mp3</span>'
-      + '<span class="book-size">' + b.s + '</span>'
-      + '</span></a>';
-    shown++;
-  });
-  list.innerHTML = html;
-  document.getElementById('count-total').textContent = books.length;
-  document.getElementById('count-authors').textContent = new Set(books.map(b=>b.a)).size;
-  document.getElementById('count-shown').textContent = shown;
-  document.getElementById('updated').textContent = 'Aktualizované: ' + generated;
+  },{rootMargin:'-100px 0px -75% 0px'});
+  sections.forEach(s=>observer.observe(s));
 }
-document.getElementById('search').addEventListener('input', e => render(e.target.value));
+
+/* ── Cover Tooltip ── */
+const tip=document.getElementById('cover-tip'), tipImg=document.getElementById('cover-tip-img');
+let tipVisible=false;
+function showTip(src,rect){
+  tipImg.src=src;
+  const y=rect.top-170; const x=rect.left+rect.width/2-80;
+  tip.style.top=(y<10?rect.bottom+10:y)+'px';
+  tip.style.left=Math.max(10,Math.min(x,window.innerWidth-170))+'px';
+  tip.classList.add('visible');
+  tipVisible=true;
+}
+function hideTip(){tip.classList.remove('visible');tipVisible=false;}
+
+/* ── Render ── */
+function render(){
+  const q=filterQ.toLowerCase();
+  const filtered=books.filter(b=>{
+    if(!q)return true;
+    return (b.a+' '+b.t).toLowerCase().includes(q);
+  });
+  const sorted=sortBooks(filtered,sortMode);
+  const list=document.getElementById('list');
+  const isAuthor=sortMode==='author';
+  const isDate=sortMode==='date';
+
+  list.classList.toggle('flat-mode',!isAuthor);
+  list.classList.toggle('date-mode',isDate);
+
+  let html='';
+  if(!sorted.length){
+    html='<div class="empty">Žiadne výsledky pre „'+esc(filterQ)+'"</div>';
+  } else if(isAuthor){
+    let curAuthor='', curLetter='';
+    sorted.forEach(b=>{
+      const letter=letterOf(b.a);
+      if(letter!==curLetter){
+        if(curLetter)html+='</div>';
+        curLetter=letter;
+        html+='<div class="letter-section" id="letter-'+letter+'" data-letter="'+letter+'">';
+      }
+      if(b.a!==curAuthor){
+        curAuthor=b.a;
+        html+='<div class="author-head">'+esc(b.a)+'</div>';
+      }
+      html+=bookRow(b);
+    });
+    if(curLetter)html+='</div>';
+  } else {
+    sorted.forEach(b=>{html+=bookRow(b);});
+  }
+
+  list.innerHTML=html;
+
+  // Stats
+  document.getElementById('st-books').textContent=books.length;
+  document.getElementById('st-authors').textContent=new Set(books.map(b=>b.a)).size;
+  document.getElementById('st-audio').textContent=totalAudio.toLocaleString('sk');
+  document.getElementById('st-size').textContent=totalSize;
+
+  // Footer
+  document.getElementById('footer').innerHTML=
+    '<span>'+filtered.length+' zobrazených</span> · Aktualizované: '+generated;
+
+  buildAlpha(filtered);
+  setupScrollSpy();
+}
+
+function bookRow(b){
+  const slug=coverSlug(b.a,b.t);
+  const coverSrc=b.c?'covers/'+slug+'.jpg':'';
+  let h='<a class="book" href="'+dbLink(b.a,b.t)+'" target="_blank" rel="noopener"'
+    +(coverSrc?' data-cover="'+coverSrc+'"':'')+'>';
+  if(coverSrc){
+    h+='<img class="book-cover" src="'+coverSrc+'" alt="" loading="lazy">';
+  } else {
+    h+='<span class="book-no-cover">'+IC_BOOK+'</span>';
+  }
+  h+='<span class="book-info">'
+    +'<span class="book-title">'+esc(b.t)+'</span>'
+    +'<span class="book-author-inline">'+esc(b.a)+'</span>'
+    +'</span>'
+    +'<span class="book-meta">'
+    +'<span class="book-date">'+fmtDate(b.d)+'</span>'
+    +'<span class="book-tracks">'+(b.n||'\u2014')+' stôp</span>'
+    +'<span class="book-size">'+b.s+'</span>'
+    +'</span></a>';
+  return h;
+}
+
+/* ── Events ── */
+// Search
+const searchEl=document.getElementById('search');
+searchEl.addEventListener('input',e=>{filterQ=e.target.value;render();});
+
+// Sort
+document.querySelectorAll('.sort-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    sortMode=btn.dataset.sort;
+    document.querySelectorAll('.sort-btn').forEach(b=>b.classList.toggle('active',b.dataset.sort===sortMode));
+    render();
+  });
+});
+
+// Alpha click
+document.getElementById('alpha-nav').addEventListener('click',e=>{
+  const b=e.target.closest('.alpha-btn');
+  if(!b||b.disabled)return;
+  const el=document.getElementById('letter-'+b.dataset.letter);
+  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+// Random
+document.getElementById('random-btn').addEventListener('click',()=>{
+  document.querySelectorAll('.book.highlighted').forEach(el=>el.classList.remove('highlighted'));
+  const b=books[Math.floor(Math.random()*books.length)];
+  filterQ='';searchEl.value='';
+  sortMode='author';
+  document.querySelectorAll('.sort-btn').forEach(s=>s.classList.toggle('active',s.dataset.sort==='author'));
+  render();
+  requestAnimationFrame(()=>{
+    const els=document.querySelectorAll('.book');
+    for(const el of els){
+      const ti=el.querySelector('.book-title');
+      if(ti&&ti.textContent===b.t){
+        el.classList.add('highlighted');
+        el.scrollIntoView({behavior:'smooth',block:'center'});
+        setTimeout(()=>el.classList.remove('highlighted'),3500);
+        break;
+      }
+    }
+  });
+});
+
+// Cover tooltip
+document.getElementById('list').addEventListener('mouseover',e=>{
+  const bk=e.target.closest('.book');
+  if(!bk)return;
+  const src=bk.getAttribute('data-cover');
+  if(!src)return;
+  const img=bk.querySelector('.book-cover');
+  if(img)showTip(src,img.getBoundingClientRect());
+});
+document.getElementById('list').addEventListener('mouseout',e=>{
+  if(tipVisible&&!e.target.closest('.book'))hideTip();
+});
+document.getElementById('list').addEventListener('mouseleave',hideTip);
+
+// Scroll: toolbar shadow + back-to-top
+const topBtn=document.getElementById('top-btn'), toolbar=document.getElementById('toolbar');
+window.addEventListener('scroll',()=>{
+  topBtn.classList.toggle('visible',window.scrollY>400);
+  toolbar.classList.toggle('scrolled',window.scrollY>10);
+},{passive:true});
+topBtn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();searchEl.focus();}
+  if(e.key==='Escape'){searchEl.value='';filterQ='';searchEl.blur();render();}
+});
+
+// Theme
+document.getElementById('theme-toggle').addEventListener('click',toggleTheme);
+initTheme();
 render();
 </script>
 </body>
